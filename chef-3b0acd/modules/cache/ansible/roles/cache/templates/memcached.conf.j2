@@ -1,0 +1,18 @@
+{% if ansible_os_family == 'Debian' %}
+# memcached default config file
+# See /etc/memcached.conf for more information
+
+-d
+-m {{ memcached_max_memory }}
+-p {{ memcached_port }}
+-u memcached
+-l {{ memcached_listen_ip }}
+-c {{ memcached_max_connections }}
+{% else %}
+# For RedHat-based systems
+PORT="{{ memcached_port }}"
+USER="memcached"
+MAXCONN="{{ memcached_max_connections }}"
+CACHESIZE="{{ memcached_max_memory }}"
+OPTIONS="-l {{ memcached_listen_ip }}"
+{% endif %}

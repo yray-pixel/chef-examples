@@ -1,0 +1,54 @@
+---
+- name: Install Redis package
+  ansible.builtin.package:
+    name: "{{ redis_packages[ansible_os_family] }}"
+    state: present
+- name: Ensure Redis user and group exist
+  ansible.builtin.user:
+    name: "{{ redis_user }}"
+    group: "{{ redis_group }}"
+    system: true
+    create_home: false
+    shell: /sbin/nologin
+    state: present
+- name: Create Redis log directory
+  ansible.builtin.file:
+    path: "{{ redis_log_dir }}"
+    owner: "{{ redis_user }}"
+    group: "{{ redis_group }}"
+    mode: "{{ redis_dir_mode }}"
+    state: directory
+    recurse: true
+- name: Create Redis configuration directory
+  ansible.builtin.file:
+    path: "{{ redis_conf_path }}"
+    owner: "{{ redis_user }}"
+    group: "{{ redis_group }}"
+    mode: "{{ redis_dir_mode }}"
+    state: directory
+    recurse: true
+- name: Configure Redis
+  ansible.builtin.template:
+    src: redis.conf.j2
+    dest: "{{ redis_conf_file }}"
+    owner: "{{ redis_user }}"
+    group: "{{ redis_group }}"
+    mode: "0640"
+  notify: Restart Redis
+- name: Modify Redis configuration file
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf_file }}"
+    regexp: "{{ item }}"
+    state: absent
+  loop:
+    - ^replica-serve-stale-data.*$
+    - ^replica-read-only.*$
+    - ^repl-ping-replica-period.*$
+    - ^client-output-buffer-limit.*$
+    - ^replica-priority.*$
+  notify: Restart Redis
+- name: Ensure Redis service is enabled and running
+  ansible.builtin.service:
+    name: "{{ redis_service_name[ansible_os_family] }}"
+    state: started
+    enabled: true
