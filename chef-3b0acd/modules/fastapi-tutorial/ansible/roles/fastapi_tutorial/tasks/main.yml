@@ -1,0 +1,81 @@
+---
+- name: Validate credential variables
+  ansible.builtin.include_tasks: validate_credentials.yml
+- name: Install required packages
+  ansible.builtin.package:
+    name: "{{ required_packages }}"
+    state: present
+- name: Enable and start PostgreSQL service
+  ansible.builtin.service:
+    name: postgresql
+    enabled: true
+    state: started
+- name: Check if PostgreSQL user exists
+  ansible.builtin.command:
+    cmd: sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='{{ username }}'"
+  register: user_exists
+  changed_when: false
+- name: Check if PostgreSQL database exists
+  ansible.builtin.command:
+    cmd: sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='{{ database_name }}'"
+  register: db_exists
+  changed_when: false
+- name: Create PostgreSQL user
+  ansible.builtin.command:
+    cmd: sudo -u postgres psql -c "CREATE USER {{ username }} WITH PASSWORD '{{ password }}';"
+  when: user_exists.stdout == ""
+  changed_when: user_exists.stdout == ""
+- name: Create PostgreSQL database
+  ansible.builtin.command:
+    cmd: sudo -u postgres psql -c "CREATE DATABASE {{ database_name }} OWNER {{ username }};"
+  when: db_exists.stdout == ""
+  changed_when: db_exists.stdout == ""
+- name: Grant privileges on PostgreSQL database
+  ansible.builtin.command:
+    cmd: sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE {{ database_name }} TO {{ username }};"
+  when: db_exists.stdout == ""
+  changed_when: db_exists.stdout == ""
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ fastapi_app_dir }}"
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+- name: Clone FastAPI tutorial repository
+  ansible.builtin.git:
+    repo: "{{ fastapi_repo_url }}"
+    dest: "{{ fastapi_app_dir }}"
+    version: "{{ fastapi_repo_version }}"
+- name: Create Python virtual environment
+  ansible.builtin.command:
+    cmd: python3 -m venv {{ python_venv_path }}
+    creates: "{{ python_venv_path }}"
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    requirements: "{{ fastapi_app_dir }}/requirements.txt"
+    virtualenv: "{{ python_venv_path }}"
+    state: present
+- name: Create environment configuration file
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ fastapi_app_dir }}/.env"
+    mode: "0644"
+    owner: root
+    group: root
+- name: Create systemd service file
+  ansible.builtin.template:
+    src: fastapi-tutorial.service.j2
+    dest: /etc/systemd/system/{{ service_name }}.service
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Reload systemd
+- name: Ensure systemd is reloaded
+  ansible.builtin.meta: flush_handlers
+- name: Enable and start FastAPI service
+  ansible.builtin.service:
+    name: "{{ service_name }}"
+    enabled: true
+    state: started
