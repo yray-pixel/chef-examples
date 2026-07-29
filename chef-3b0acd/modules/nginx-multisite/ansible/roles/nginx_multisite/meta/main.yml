@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  role_name: nginx_multisite
+  author: Ansible Migration Team
+  description: Configures Nginx with multiple sites and security hardening
+  company: Example Company
+  license: MIT
+  min_ansible_version: "2.9"
+  standalone: true
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+  galaxy_tags:
+    - nginx
+    - web
+    - security
+    - ssl
+dependencies: []
