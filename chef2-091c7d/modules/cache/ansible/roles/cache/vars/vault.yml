@@ -1,0 +1,7 @@
+---
+# This file is intended to be encrypted with ansible-vault
+# It contains sensitive variables that should be protected
+# In AAP, these values will be provided by credential objects
+
+# Redis password is provided by AAP credential injection
+# redis_password: supersecret
