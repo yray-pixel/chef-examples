@@ -8,7 +8,7 @@
       "name": "Destructive Operation Boundary",
       "findings": 0,
       "critical_findings": 0,
-      "summary": "No destructive operations were found in the workspace as no Ansible implementation has been generated yet. The workspace only contains planning documents and reports."
+      "summary": "No findings detected as the workspace only contains planning documents and reports related to the migration from Chef to Ansible, but no actual Ansible code has been generated yet."
     }
   ]
 }
