@@ -8,7 +8,7 @@
       "name": "Destructive Operation Boundary",
       "findings": 0,
       "critical_findings": 0,
-      "summary": "No findings detected. The workspace only contains a migration plan document and does not yet have any generated Ansible code to analyze. The migration plan mentions a potentially destructive operation in the original Chef cookbook (removing configuration lines from Redis), but since no Ansible implementation exists yet, there are no actual issues to report."
+      "summary": "No destructive operations were found in the workspace as no Ansible implementation has been generated yet. The workspace only contains planning documents and reports."
     }
   ]
 }
