@@ -1,0 +1,14 @@
+{
+  "phase": "migrate",
+  "agents_run": 1,
+  "total_findings": 0,
+  "total_critical_findings": 0,
+  "agents": [
+    {
+      "name": "Privilege Escalation Gate",
+      "findings": 0,
+      "critical_findings": 0,
+      "summary": "No instances of unnecessary privilege escalation were found in the Ansible tasks."
+    }
+  ]
+}
