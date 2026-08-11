@@ -1,0 +1,8 @@
+---
+redis_port: "6379"
+redis_password: "{{ redis_password | default('redis_secure_password_123') }}"
+redis_log_dir: /var/log/redis
+redis_log_dir_owner: redis
+redis_log_dir_group: redis
+redis_log_dir_mode: "0755"
+redis_conf_path: /etc/redis/redis.conf

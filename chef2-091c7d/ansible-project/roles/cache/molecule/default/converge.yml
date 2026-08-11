@@ -1,0 +1,67 @@
+- name: Converge
+  hosts: all
+  gather_facts: true
+  vars:
+    redis_log_dir: /tmp/molecule_test/var/log/redis
+    redis_conf_path: /tmp/molecule_test/etc/redis/redis.conf
+  tasks:
+  - name: Create expected directories
+    ansible.builtin.file:
+      path: '{{ item }}'
+      state: directory
+      mode: '0755'
+    loop:
+    - /tmp/molecule_test/etc/redis
+    - /tmp/molecule_test/var/log/redis
+  - name: Create Redis configuration file
+    ansible.builtin.copy:
+      content: '# Redis configuration file
+
+        port 6379
+
+        requirepass redis_secure_password_123
+
+        # Other Redis settings would be here
+
+        # The following settings should be removed by the role:
+
+        replica-serve-stale-data yes
+
+        replica-read-only yes
+
+        repl-ping-replica-period 10
+
+        client-output-buffer-limit normal 0 0 0
+
+        replica-priority 100
+
+        '
+      dest: '{{ redis_conf_path }}'
+      mode: '0644'
+  - name: Create Redis log file
+    ansible.builtin.copy:
+      content: '# Redis log file '
+      dest: /tmp/molecule_test/var/log/redis/redis_6379.log
+      mode: '0644'
+  - name: Create Memcached configuration file
+    ansible.builtin.copy:
+      content: '# Memcached configuration file
+
+        -m 64
+
+        -p 11211
+
+        -u memcached
+
+        -l 127.0.0.1
+
+        '
+      dest: /tmp/molecule_test/etc/memcached.conf
+      mode: '0644'
+  - name: Create Memcached log file
+    ansible.builtin.copy:
+      content: '# Memcached log file '
+      dest: /tmp/molecule_test/var/log/memcached.log
+      mode: '0644'
+  - name: Include role tasks
+    ansible.builtin.include_tasks: ../../tasks/main.yml
