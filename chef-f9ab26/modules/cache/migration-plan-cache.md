@@ -16,11 +16,11 @@ source-path: cookbooks/cache
   - Location/Path: /etc/redis/6379.conf
   - Port/Socket: 6379
   - Key Config: Authentication enabled with password 'redis_secure_password_123'
-  
+
 - **Memcached**:
-  - Location/Path: Not explicitly defined in this cookbook (handled by dependency)
-  - Port/Socket: Not explicitly defined in this cookbook (handled by dependency)
-  - Key Config: Not explicitly defined in this cookbook (handled by dependency)
+  - Location/Path: Not specified in this cookbook (handled by dependency)
+  - Port/Socket: Not specified in this cookbook (handled by dependency)
+  - Key Config: Not specified in this cookbook (handled by dependency)
 
 ## File Structure
 
@@ -33,22 +33,21 @@ cookbooks/cache/recipes/default.rb
 The cookbook performs operations in this order:
 
 1. **default** (`cookbooks/cache/recipes/default.rb`):
-   - Includes the memcached recipe from external cookbook
+   - Includes the memcached recipe from external dependency
+     - Resources: include_recipe (1)
    - Sets Redis configuration attributes:
      - port: 6379
-     - requirepass: redis_secure_password_123
+     - requirepass: 'redis_secure_password_123'
      - replicaservestaledata: nil
    - Creates Redis log directory at /var/log/redis
-     - Owner: redis
-     - Group: redis
-     - Mode: 0755
      - Resources: directory (1)
-   - Includes the redisio recipe from external cookbook
+   - Includes the redisio recipe from external dependency
+     - Resources: include_recipe (1)
    - Executes a ruby_block to modify Redis configuration file
-     - Removes several replication-related configuration lines from /etc/redis/6379.conf
+     - Removes several replica-related configuration lines from /etc/redis/6379.conf
      - Resources: ruby_block (1)
-   - Includes the redisio::enable recipe from external cookbook
-   - Resources: include_recipe (3), directory (1), ruby_block (1)
+   - Includes the redisio::enable recipe from external dependency
+     - Resources: include_recipe (1)
 
 ## Dependencies
 
@@ -84,14 +83,14 @@ The cookbook performs operations in this order:
 
 **Files to verify**:
 - /etc/redis/6379.conf
-- /var/log/redis/
+- /var/log/redis (directory)
 
 **Service endpoints to check**:
 - Ports listening: 6379 (Redis)
-- Memcached port (typically 11211, but not explicitly defined in this cookbook)
+- Memcached port (likely 11211, but not specified in this cookbook)
 
 **Templates rendered**:
-No templates are directly rendered by this cookbook. Templates are likely rendered by the dependency cookbooks.
+- None directly from this cookbook (handled by dependencies)
 
 ## Pre-flight checks:
 ```bash
@@ -126,18 +125,14 @@ systemctl status memcached
 ps aux | grep memcached
 
 # Memcached connectivity
-echo "stats" | nc localhost 11211
+echo stats | nc localhost 11211
 memcached-tool localhost:11211 stats
-
-# Memcached configuration validation
-cat /etc/memcached.conf
-
-# Memcached logs
-tail -f /var/log/memcached.log
-journalctl -u memcached -f
 
 # Memcached network listening
 netstat -tulpn | grep memcached
 ss -tlnp | grep memcached
 lsof -i :11211
+
+# Memcached configuration validation
+cat /etc/memcached.conf
 ```
