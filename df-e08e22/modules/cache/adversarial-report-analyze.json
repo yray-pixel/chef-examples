@@ -1,0 +1,14 @@
+{
+  "phase": "analyze",
+  "agents_run": 1,
+  "total_findings": 0,
+  "total_critical_findings": 0,
+  "agents": [
+    {
+      "name": "Destructive Operation Boundary",
+      "findings": 0,
+      "critical_findings": 0,
+      "summary": "No issues found in the workspace. The analysis revealed only migration planning documents and metadata, with no actual Ansible code containing destructive operations."
+    }
+  ]
+}
