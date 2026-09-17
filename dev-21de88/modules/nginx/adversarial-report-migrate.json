@@ -1,0 +1,20 @@
+{
+  "phase": "migrate",
+  "agents_run": 2,
+  "total_findings": 8,
+  "total_critical_findings": 2,
+  "agents": [
+    {
+      "name": "Privilege Escalation Gate",
+      "findings": 4,
+      "critical_findings": 2,
+      "summary": "The nginx Ansible role performs system-level operations without declaring privilege escalation. Package installation, service management, and writing to /etc/nginx all require root. Tasks missing 'become: yes' will fail on hardened hosts where the connection user is unprivileged."
+    },
+    {
+      "name": "Idempotency Auditor",
+      "findings": 4,
+      "critical_findings": 0,
+      "summary": "Several tasks in the nginx role are not fully idempotent. Shell commands used for configuration validation run unconditionally, and the EPEL repo file is copied without a checksum check, causing unnecessary changes on repeated runs."
+    }
+  ]
+}
