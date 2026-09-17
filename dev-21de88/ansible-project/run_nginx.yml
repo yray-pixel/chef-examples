@@ -1,0 +1,7 @@
+---
+- name: Run nginx
+  hosts: all
+
+
+  roles:
+    - nginx
