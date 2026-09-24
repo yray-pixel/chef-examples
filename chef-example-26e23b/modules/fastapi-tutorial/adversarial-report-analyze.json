@@ -1,0 +1,14 @@
+{
+  "phase": "analyze",
+  "agents_run": 1,
+  "total_findings": 7,
+  "total_critical_findings": 4,
+  "agents": [
+    {
+      "name": "Analysis Gap Hunter",
+      "findings": 7,
+      "critical_findings": 4,
+      "summary": "The migration plan for the fastapi-tutorial module has several critical gaps that need to be addressed before proceeding with the migration. The most significant issues are related to security (running as root), lack of error handling and retry logic, missing backup and rollback strategies, and inadequate credential management. Additionally, there are concerns about health checks, Nginx integration, and dependency management that should be addressed to ensure a successful migration."
+    }
+  ]
+}
