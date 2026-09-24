@@ -1,0 +1,14 @@
+{
+  "phase": "analyze",
+  "agents_run": 1,
+  "total_findings": 8,
+  "total_critical_findings": 4,
+  "agents": [
+    {
+      "name": "Analysis gap hunter",
+      "findings": 8,
+      "critical_findings": 4,
+      "summary": "The cache module migration plan contains several critical gaps and omissions that could lead to service disruption, data loss, or security vulnerabilities. The most significant issues include lack of rollback strategy, insecure credential handling, and insufficient dependency migration planning."
+    }
+  ]
+}
