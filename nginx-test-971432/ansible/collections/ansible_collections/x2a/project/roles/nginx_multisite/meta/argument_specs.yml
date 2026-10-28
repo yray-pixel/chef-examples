@@ -1,0 +1,42 @@
+---
+argument_specs:
+  main:
+    short_description: Configures nginx with multiple SSL-enabled subdomains
+    description:
+      - Deploys nginx with multiple HTTPS sites, firewall hardening, and SSL certificates.
+    options:
+      nginx_multisite_sites:
+        type: dict
+        required: false
+        default: {}
+        description: Mapping of site names to their configuration.
+      nginx_multisite_ssl_certificate_path:
+        type: str
+        required: false
+        default: /etc/ssl/certs
+        description: Directory path for SSL certificates.
+      nginx_multisite_ssl_private_key_path:
+        type: str
+        required: false
+        default: /etc/ssl/private
+        description: Directory path for SSL private keys.
+      security_fail2ban_enabled:
+        type: bool
+        required: false
+        default: true
+        description: Enable fail2ban service.
+      security_ufw_enabled:
+        type: bool
+        required: false
+        default: true
+        description: Enable UFW firewall.
+      security_ssh_disable_root:
+        type: bool
+        required: false
+        default: true
+        description: Disable root SSH login.
+      security_ssh_password_auth:
+        type: bool
+        required: false
+        default: false
+        description: Disable SSH password authentication.

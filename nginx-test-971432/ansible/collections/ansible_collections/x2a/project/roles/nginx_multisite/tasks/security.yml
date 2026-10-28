@@ -1,0 +1,89 @@
+---
+- name: Install fail2ban and ufw packages
+  ansible.builtin.package:
+    name:
+      - fail2ban
+      - ufw
+    state: present
+
+- name: Ensure fail2ban service is enabled and started
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
+
+- name: Deploy fail2ban jail configuration
+  ansible.builtin.template:
+    src: fail2ban.jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    mode: "0644"
+    backup: true
+  notify: Restart fail2ban
+
+- name: Install openssh-server package
+  ansible.builtin.package:
+    name: openssh-server
+    state: present
+
+- name: Get UFW status
+  ansible.builtin.command:
+    cmd: ufw status
+  changed_when: false
+  register: ufw_status
+
+- name: Set default deny policy for UFW
+  ansible.builtin.command:
+    cmd: ufw --force default deny
+  when: "'Default: deny' not in ufw_status.stdout"  # noqa: L039 - variable defined by prior task
+
+- name: Allow SSH through UFW
+  ansible.builtin.command:
+    cmd: ufw allow ssh
+  when: "'22/tcp' not in ufw_status.stdout"  # noqa: L039 - variable defined by prior task
+
+- name: Allow HTTP through UFW
+  ansible.builtin.command:
+    cmd: ufw allow http
+  when: "'80/tcp' not in ufw_status.stdout"  # noqa: L039 - variable defined by prior task
+
+- name: Allow HTTPS through UFW
+  ansible.builtin.command:
+    cmd: ufw allow https
+  when: "'443/tcp' not in ufw_status.stdout"  # noqa: L039 - variable defined by prior task
+
+- name: Enable UFW
+  ansible.builtin.command:
+    cmd: ufw --force enable
+  when: "'Status: active' not in ufw_status.stdout"  # noqa: L039 - variable defined by prior task
+
+- name: Deploy sysctl security configuration
+  ansible.builtin.template:
+    src: sysctl-security.conf.j2
+    dest: /etc/sysctl.d/99-security.conf
+    mode: "0644"
+    backup: true
+  notify: Reload sysctl
+
+- name: Disable root login in SSH config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: ^#?PermitRootLogin
+    line: PermitRootLogin no
+    state: present
+  when: security_ssh_disable_root | bool
+  notify: Restart ssh
+
+- name: Disable password authentication in SSH config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: ^#?PasswordAuthentication
+    line: PasswordAuthentication no
+    state: present
+  when: not security_ssh_password_auth | bool
+  notify: Restart ssh
+
+- name: Ensure ssh service is enabled and started
+  ansible.builtin.service:
+    name: ssh
+    state: started
+    enabled: true

@@ -1,0 +1,214 @@
+# Verify playbook for nginx_multisite Molecule scenario
+# All pre‑flight checks from the migration plan are implemented below.
+---
+- name: Verify nginx_multisite scenario
+  hosts: all
+  gather_facts: false
+  tasks:
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Verify nginx service is active
+      ansible.builtin.assert:
+        that:
+          - "'nginx' in services"
+          - services['nginx']['state'] == 'running'
+          - services['nginx']['status'] == 'enabled'
+        fail_msg: "nginx service is not running or enabled"
+        success_msg: "nginx service is running and enabled"
+
+    - name: Verify fail2ban service is active
+      ansible.builtin.assert:
+        that:
+          - "'fail2ban' in services"
+          - services['fail2ban']['state'] == 'running'
+          - services['fail2ban']['status'] == 'enabled'
+        fail_msg: "fail2ban service is not running or enabled"
+        success_msg: "fail2ban service is running and enabled"
+
+    - name: Verify ssh service is active
+      ansible.builtin.assert:
+        that:
+          - "'ssh' in services"
+          - services['ssh']['state'] == 'running'
+        fail_msg: "ssh service is not running"
+        success_msg: "ssh service is running"
+
+    - name: Check UFW status output
+      ansible.builtin.command:
+        argv:
+          - ufw
+          - status
+          - numbered
+      register: ufw_status
+      changed_when: false
+
+    - name: Verify UFW default deny and allow rules for ssh, http, https
+      ansible.builtin.assert:
+        that:
+          - "'Default: deny (incoming)' in ufw_status.stdout"
+          - "'ALLOW' in ufw_status.stdout and 'ssh' in ufw_status.stdout"
+          - "'ALLOW' in ufw_status.stdout and 'http' in ufw_status.stdout"
+          - "'ALLOW' in ufw_status.stdout and 'https' in ufw_status.stdout"
+        fail_msg: "UFW rules are not as expected"
+        success_msg: "UFW default deny and required allow rules are present"
+
+    - name: Check Fail2Ban configuration contains enabled true
+      ansible.builtin.command:
+        argv:
+          - grep
+          - -i
+          - enabled
+          - /etc/fail2ban/jail.local
+      register: fail2ban_enabled
+      changed_when: false
+
+    - name: Verify Fail2Ban configuration has enabled true
+      ansible.builtin.assert:
+        that:
+          - "'true' in fail2ban_enabled.stdout.lower()"
+        fail_msg: "Fail2Ban jail.local does not contain enabled true"
+        success_msg: "Fail2Ban jail.local contains enabled true"
+
+    - name: Check sysctl security settings
+      ansible.builtin.command:
+        argv:
+          - sysctl
+          - -a
+      register: sysctl_all
+      changed_when: false
+
+    - name: Verify required sysctl parameters are present
+      ansible.builtin.assert:
+        that:
+          - "'fs.suid_dumpable' in sysctl_all.stdout"
+          - "'kernel.randomize_va_space' in sysctl_all.stdout"
+          - "'net.ipv4.conf.all.rp_filter' in sysctl_all.stdout"
+        fail_msg: "One or more required sysctl parameters are missing"
+        success_msg: "All required sysctl parameters are present"
+
+    - name: Check SSH hardening configuration
+      ansible.builtin.command:
+        argv:
+          - grep
+          - -E
+          - '^PermitRootLogin|^PasswordAuthentication'
+          - /etc/ssh/sshd_config
+      register: ssh_hardening
+      changed_when: false
+
+    - name: Verify SSH root login disabled and password auth disabled
+      ansible.builtin.assert:
+        that:
+          - "'PermitRootLogin no' in ssh_hardening.stdout"
+          - "'PasswordAuthentication no' in ssh_hardening.stdout"
+        fail_msg: "SSH hardening settings are not as expected"
+        success_msg: "SSH root login and password authentication are disabled"
+
+    - name: Test nginx configuration syntax
+      ansible.builtin.command:
+        argv:
+          - nginx
+          - -t
+      register: nginx_test
+      changed_when: false
+
+    - name: Verify nginx configuration test succeeded
+      ansible.builtin.assert:
+        that:
+          - nginx_test.rc == 0
+        fail_msg: "nginx configuration test failed"
+        success_msg: "nginx configuration test passed"
+
+    - name: Reload nginx service
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - reload
+          - nginx
+      register: nginx_reload
+      changed_when: false
+
+    - name: Verify nginx reload succeeded
+      ansible.builtin.assert:
+        that:
+          - nginx_reload.rc == 0
+        fail_msg: "Failed to reload nginx"
+        success_msg: "nginx reloaded successfully"
+
+    - name: Verify HTTPS site responses
+      ansible.builtin.command:
+        argv:
+          - curl
+          - -k
+          - -I
+          - https://{{ item_nginx_multisite }}
+      loop:
+        - test.cluster.local
+        - ci.cluster.local
+        - status.cluster.local
+      loop_control:
+        loop_var: item_nginx_multisite
+      register: site_https
+      changed_when: false
+
+    - name: Assert each HTTPS site returns HTTP/1.1 200 OK
+      ansible.builtin.assert:
+        that:
+          - "'HTTP/1.1 200 OK' in item_nginx_multisite['stdout']"
+        fail_msg: "Site {{ item_nginx_multisite['item'] }} did not return 200 OK"
+        success_msg: "Site {{ item_nginx_multisite['item'] }} returned 200 OK"
+      loop: "{{ site_https.results }}"
+      loop_control:
+        loop_var: item_nginx_multisite
+
+    - name: Verify document root index.html files exist
+      ansible.builtin.stat:
+        path: "{{ item_nginx_multisite }}"
+      loop:
+        - /opt/server/test/index.html
+        - /opt/server/ci/index.html
+        - /opt/server/status/index.html
+      loop_control:
+        loop_var: item_nginx_multisite
+      register: doc_root_stat
+
+    - name: Assert each index.html is present and is a regular file
+      ansible.builtin.assert:
+        that:
+          - item_nginx_multisite['stat']['exists']
+          - item_nginx_multisite['stat']['isreg']
+        fail_msg: "Index file {{ item_nginx_multisite['item'] }} is missing or not a regular file"
+        success_msg: "Index file {{ item_nginx_multisite['item'] }} is present"
+      loop: "{{ doc_root_stat.results }}"
+      loop_control:
+        loop_var: item_nginx_multisite
+
+    - name: Verify SSL certificate files can be parsed
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -noout
+          - -subject
+          - -in
+          - /etc/ssl/certs/{{ item_nginx_multisite }}.crt
+      loop:
+        - test.cluster.local
+        - ci.cluster.local
+        - status.cluster.local
+      loop_control:
+        loop_var: item_nginx_multisite
+      register: cert_check
+      changed_when: false
+
+    - name: Assert SSL certificate parsing succeeded for each site
+      ansible.builtin.assert:
+        that:
+          - item_nginx_multisite['rc'] == 0
+        fail_msg: "SSL certificate for {{ item_nginx_multisite['item'] }} could not be parsed"
+        success_msg: "SSL certificate for {{ item_nginx_multisite['item'] }} is valid"
+      loop: "{{ cert_check.results }}"
+      loop_control:
+        loop_var: item_nginx_multisite

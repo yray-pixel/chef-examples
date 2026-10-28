@@ -1,0 +1,8 @@
+---
+- ansible.builtin.import_tasks: security.yml
+
+- ansible.builtin.import_tasks: nginx.yml
+
+- ansible.builtin.import_tasks: ssl.yml
+
+- ansible.builtin.import_tasks: sites.yml

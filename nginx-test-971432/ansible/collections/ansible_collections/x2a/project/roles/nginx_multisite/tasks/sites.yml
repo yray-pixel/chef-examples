@@ -1,0 +1,33 @@
+---
+- name: Deploy site configuration files
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: /etc/nginx/sites-available/{{ item_sites['key'] }}  # noqa: R114 - dest from role-defined site name, trusted
+    mode: "0644"
+    backup: true
+  loop: "{{ nginx_multisite_sites | dict2items }}"
+  loop_control:
+    loop_var: item_sites
+  notify: Restart nginx
+  vars:
+    server_name: "{{ item_sites['key'] }}"
+    document_root: "{{ item_sites['value']['document_root'] }}"
+    ssl_enabled: "{{ item_sites['value']['ssl_enabled'] }}"
+    cert_file: "{{ nginx_multisite_ssl_certificate_path }}/{{ item_sites['key'] }}.crt"
+    key_file: "{{ nginx_multisite_ssl_private_key_path }}/{{ item_sites['key'] }}.key"
+
+- name: Enable site by creating symlink
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/{{ item_sites['key'] }}
+    dest: /etc/nginx/sites-enabled/{{ item_sites['key'] }}  # noqa: R114 - dest from role-defined site name, trusted
+    state: link
+  loop: "{{ nginx_multisite_sites | dict2items }}"
+  loop_control:
+    loop_var: item_sites
+  notify: Restart nginx
+
+- name: Remove default site symlink
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Restart nginx
