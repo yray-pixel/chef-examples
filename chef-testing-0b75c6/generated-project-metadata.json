@@ -2,19 +2,13 @@
   {
     "name": "cache",
     "path": "cookbooks/cache",
-    "description": "Configures caching services by installing Memcached, setting up Redis with authentication, and managing log directories.",
+    "description": "Configures caching services \u2013 installs Memcached, configures Redis (including authentication), creates log directories and applies a hacky config cleanup for Redis.",
     "technology": "Chef"
   },
   {
     "name": "fastapi-tutorial",
     "path": "cookbooks/fastapi-tutorial",
-    "description": "Deploys a FastAPI tutorial application, handling package installation, source checkout, virtual environment setup, PostgreSQL provisioning, and systemd service creation.",
-    "technology": "Chef"
-  },
-  {
-    "name": "nginx-multisite",
-    "path": "cookbooks/nginx-multisite",
-    "description": "Sets up an Nginx reverse\u2011proxy with multiple SSL\u2011enabled sites, including security hardening, firewall rules, and per\u2011site content provisioning.",
+    "description": "Deploys a FastAPI tutorial application: installs system packages, clones source, creates a Python virtual environment, installs dependencies, provisions PostgreSQL, creates DB/user, writes `.env`, creates a systemd service, enables and starts the app.",
     "technology": "Chef"
   }
 ]
