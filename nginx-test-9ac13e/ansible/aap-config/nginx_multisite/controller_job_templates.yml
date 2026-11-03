@@ -1,0 +1,9 @@
+---
+controller_templates_x2a_nginx_multisite:
+- name: nginx-test-9ac13e_nginx_multisite
+  organization: Default
+  project: nginx-test-9ac13e
+  job_type: run
+  playbook: nginx-test-9ac13e/ansible/run_nginx_multisite.yml
+  inventory: __X2A_REQUIRED_INVENTORY__
+  prevent_instance_group_fallback: false

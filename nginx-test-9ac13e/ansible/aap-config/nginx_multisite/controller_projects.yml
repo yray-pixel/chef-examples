@@ -1,0 +1,12 @@
+---
+controller_projects_x2a_nginx_multisite:
+- name: nginx-test-9ac13e
+  organization: Default
+  scm_type: git
+  scm_url: https://github.com/yray-pixel/chef-examples.git
+  scm_branch: testingPRchanges
+  scm_update_on_launch: true
+  scm_clean: true
+  scm_delete_on_update: true
+  update_project: true
+  wait: true
