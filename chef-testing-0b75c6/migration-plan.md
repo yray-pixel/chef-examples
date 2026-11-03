@@ -20,7 +20,6 @@ This repository contains Chef cookbooks that need individual migration planning:
 |--------|-------------|------|------------|--------------|
 | **cache** | Configures caching services – installs Memcached, configures Redis (including authentication), creates log directories and applies a hacky config cleanup for Redis. | `cookbooks/cache` | Chef | Memcached install, Redis with password, directory management, inline Ruby block for config sanitisation. |
 | **fastapi-tutorial** | Deploys a FastAPI tutorial application: installs system packages, clones source, creates a Python virtual environment, installs dependencies, provisions PostgreSQL, creates DB/user, writes `.env`, creates a systemd service, enables and starts the app. | `cookbooks/fastapi-tutorial` | Chef | Python/venv, Git checkout, PostgreSQL service & DB creation, hard‑coded DB credentials, systemd unit file, service enable/start. |
-| **nginx-multisite** | Sets up an Nginx reverse‑proxy serving multiple SSL‑enabled sub‑domains. Includes security hardening (fail2ban, ufw, sysctl), Nginx config/templates, per‑site document roots, self‑signed certificate generation, and site content provisioning. | `cookbooks/nginx-multisite` | Chef | Nginx install, fail2ban, ufw firewall rules, sysctl security, per‑site config, SSL cert generation, templated nginx.conf, site HTML files. |
 
 **CRITICAL PATH VERIFICATION:** All paths have been confirmed from the repository tree and content reads; no additional modules were hidden.
 
