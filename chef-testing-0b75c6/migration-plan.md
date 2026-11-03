@@ -77,8 +77,8 @@ External cookbook code will be removed and replaced by mature Ansible Galaxy rol
 
 ### Migration Order
 
-1. **Foundational services** – Migrate `cache` cookbook first (memcached & Redis). This is low‑risk, isolated, and provides a base for the FastAPI DB connections.
-2. **Application layer** – Migrate `fastapi-tutorial` next; it depends on PostgreSQL (system packages) and the caching services.
+1. **Application layer** – Migrate `fastapi-tutorial` first; it depends on PostgreSQL (system packages) and the caching services.
+2. **Foundational services** – Migrate `cache` cookbook next (memcached & Redis). This is low‑risk, isolated, and provides a base for the FastAPI DB connections.
 3. **Ingress & security** – Finally migrate `nginx-multisite`, as it ties together site content, SSL, firewall, and fail2ban. This order respects runtime dependencies and allows incremental testing.
 
 ---
