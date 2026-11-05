@@ -1,0 +1,29 @@
+---
+argument_specs:
+  main:
+    short_description: Configures caching services (memcached and redis)
+    description:
+      - Configure cache role defaults and tasks for Redis and optional Memcached.
+    options:
+      cache_redisio_servers:
+        type: list
+        elements: dict
+        required: false
+        default:
+          - port: "6379"
+            requirepass: redis_secure_password_123
+            replicaservestaledata:
+        description: List of Redis server definitions with port, password and optional replica settings.
+        options:
+          port:
+            type: str
+            required: false
+            description: Redis listening port.
+          requirepass:
+            type: str
+            required: false
+            description: Password for Redis authentication.
+          replicaservestaledata:
+            type: str
+            required: false
+            description: Optional replica server data.

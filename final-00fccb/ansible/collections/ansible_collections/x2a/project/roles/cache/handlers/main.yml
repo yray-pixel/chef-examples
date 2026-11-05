@@ -1,0 +1,7 @@
+---
+# Handlers for cache role
+
+- name: Restart redis service
+  ansible.builtin.service:
+    name: redis
+    state: restarted

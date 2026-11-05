@@ -1,0 +1,81 @@
+---
+- name: Ensure redis group exists
+  ansible.builtin.group:
+    name: redis
+    state: present
+
+- name: Ensure redis user exists
+  ansible.builtin.user:
+    name: redis
+    group: redis
+    create_home: false
+    system: true
+    shell: /usr/sbin/nologin
+    state: present
+
+- name: Install Redis server package
+  ansible.builtin.package:
+    name: redis-server
+    state: present
+
+- name: Check Redis config file exists
+  ansible.builtin.stat:
+    path: /etc/redis/6379.conf
+  register: redis_conf
+
+- name: Ensure Redis log directory exists
+  ansible.builtin.file:
+    path: /var/log/redis
+    state: directory
+    owner: redis
+    group: redis
+    mode: "0755"
+    recurse: true
+    # noqa: args - backup not supported for file module
+
+- name: Remove replica-serve-stale-data from Redis config
+  ansible.builtin.replace:
+    path: /etc/redis/6379.conf
+    regexp: ^replica-serve-stale-data.*$
+    replace: ""
+    backup: true
+  when: redis_conf.stat.exists  # noqa: L039 - redis_conf registered earlier
+
+- name: Remove replica-read-only from Redis config
+  ansible.builtin.replace:
+    path: /etc/redis/6379.conf
+    regexp: ^replica-read-only.*$
+    replace: ""
+    backup: true
+  when: redis_conf.stat.exists  # noqa: L039 - redis_conf registered earlier
+
+- name: Remove repl-ping-replica-period from Redis config
+  ansible.builtin.replace:
+    path: /etc/redis/6379.conf
+    regexp: ^repl-ping-replica-period.*$
+    replace: ""
+    backup: true
+  when: redis_conf.stat.exists  # noqa: L039 - redis_conf registered earlier
+
+- name: Remove client-output-buffer-limit from Redis config
+  ansible.builtin.replace:
+    path: /etc/redis/6379.conf
+    regexp: ^client-output-buffer-limit.*$
+    replace: ""
+    backup: true
+  when: redis_conf.stat.exists  # noqa: L039 - redis_conf registered earlier
+
+- name: Remove replica-priority from Redis config
+  ansible.builtin.replace:
+    path: /etc/redis/6379.conf
+    regexp: ^replica-priority.*$
+    replace: ""
+    backup: true
+  when: redis_conf.stat.exists  # noqa: L039 - redis_conf registered earlier
+
+# Placeholder: include memcached recipe tasks (not present)
+# - import_tasks: memcached.yml
+# Placeholder: include redisio recipe tasks (not present)
+# - import_tasks: redisio.yml
+# Placeholder: enable redis service (not present)
+# - import_tasks: enable.yml

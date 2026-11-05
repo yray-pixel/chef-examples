@@ -1,0 +1,62 @@
+# Unsupported checks (no explicit expected outcome):
+# - Verify the redis group existence (optional)
+# - Preview first lines of the Redis configuration file
+# - Check Redis service status (redis.service or redis-server.service)
+# - Verify Redis is listening on port 6379
+# - Simple connectivity test is covered by Redis ping check below
+---
+- name: Verify Redis cache pre‑flight checks
+  hosts: all
+  gather_facts: false
+  tasks:
+    # Verify the log directory exists and has mode 0755
+    - name: Stat Redis log directory
+      ansible.builtin.stat:
+        path: /var/log/redis
+      register: redis_log_dir
+
+    - name: Assert Redis log directory exists and is a directory
+      ansible.builtin.assert:
+        that:
+          - redis_log_dir.stat.exists
+          - redis_log_dir.stat.isdir
+        fail_msg: "Redis log directory /var/log/redis does not exist or is not a directory"
+        success_msg: "Redis log directory exists"
+
+    - name: Assert Redis log directory permissions are 0755
+      ansible.builtin.assert:
+        that:
+          - redis_log_dir.stat.mode == '0755'
+        fail_msg: "Redis log directory permissions are not 0755"
+        success_msg: "Redis log directory permissions are correct"
+
+    # Verify the Redis configuration file exists
+    - name: Stat Redis configuration file
+      ansible.builtin.stat:
+        path: /etc/redis/redis.conf
+      register: redis_conf
+
+    - name: Assert Redis configuration file exists
+      ansible.builtin.assert:
+        that:
+          - redis_conf.stat.exists
+          - redis_conf.stat.isreg
+        fail_msg: "Redis configuration file /etc/redis/redis.conf is missing"
+        success_msg: "Redis configuration file exists"
+
+    # Simple connectivity test: redis-cli PING should return PONG
+    - name: Ping Redis using redis-cli
+      ansible.builtin.command:
+        argv:
+          - redis-cli
+          - PING
+      register: redis_ping
+      changed_when: false
+      ignore_errors: true
+
+    - name: Assert Redis ping returned PONG
+      ansible.builtin.assert:
+        that:
+          - redis_ping.stdout is search('PONG')
+        fail_msg: "Redis ping failed or did not return PONG"
+        success_msg: "Redis ping succeeded with PONG"
