@@ -1,0 +1,20 @@
+[
+  {
+    "name": "cache",
+    "path": "cookbooks/cache",
+    "description": "Configures caching services by installing Memcached, setting up Redis with authentication, creating a log directory, and applying a custom Ruby\u2011block hack to clean up Redis configuration defaults.",
+    "technology": "Chef"
+  },
+  {
+    "name": "fastapi-tutorial",
+    "path": "cookbooks/fastapi-tutorial",
+    "description": "Deploys a FastAPI tutorial application by installing Python, cloning the source repository, setting up a virtual environment, installing dependencies, provisioning PostgreSQL with database and user, creating an .env file, and configuring a systemd service.",
+    "technology": "Chef"
+  },
+  {
+    "name": "nginx-multisite",
+    "path": "cookbooks/nginx-multisite",
+    "description": "Sets up Nginx with multiple SSL\u2011enabled sub\u2011domains, hardens the host with fail2ban, UFW, and SSH configuration, generates self\u2011signed certificates for development, and deploys per\u2011site document roots and static index pages.",
+    "technology": "Chef"
+  }
+]
