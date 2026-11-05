@@ -1,0 +1,14 @@
+{
+  "phase": "analyze",
+  "agents_run": 1,
+  "total_findings": 10,
+  "total_critical_findings": 6,
+  "agents": [
+    {
+      "name": "Analysis gap hunter",
+      "findings": 10,
+      "critical_findings": 6,
+      "summary": "Extracted findings from the adversarial analysis of the cache module migration plan."
+    }
+  ]
+}
