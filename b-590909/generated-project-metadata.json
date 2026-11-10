@@ -1,0 +1,20 @@
+[
+  {
+    "name": "cache",
+    "path": "cookbooks/cache",
+    "description": "Sets up caching layer \u2013 installs memcached, configures a secured Redis instance (password, log directory, custom config tweaks), and ensures services are enabled.",
+    "technology": "Chef"
+  },
+  {
+    "name": "fastapi-tutorial",
+    "path": "cookbooks/fastapi-tutorial",
+    "description": "Deploys a demo FastAPI application. Installs Python 3, system packages, clones a Git repo, builds a virtualenv, installs Python deps, creates a PostgreSQL database/user, writes a .env file with plaintext credentials, and installs a systemd service for the app.",
+    "technology": "Chef"
+  },
+  {
+    "name": "nginx-multisite",
+    "path": "cookbooks/nginx-multisite",
+    "description": "Configures Nginx as a multi-site reverse-proxy with SSL termination. Provides separate recipes for security hardening, base Nginx install, SSL cert handling, and per-site document roots.",
+    "technology": "Chef"
+  }
+]
